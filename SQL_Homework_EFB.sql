@@ -12,7 +12,8 @@ where first_name = "Joe";
 select actor_id, first_name, last_name from actor
 where last_name like '%GEN%';
 
--- homework 2c find all actors with last name contains letters "LI" order rows by last name and first name 
+/** homework 2c find all actors with last name contains letters "LI" order
+ rows by last name and first name**/
 select actor_id, first_name, last_name from actor
 where last_name like '%LI%'
 order by last_name, first_name;
@@ -145,22 +146,80 @@ where country.country = "Canada";
 
 /** 7d. Sales have been lagging among young families, and you wish to target all family movies 
 for a promotion. Identify all movies categorized as family films. **/
+Select * from category;
+
+select film.title,
+	   film.rating
+from film
+where film_id in
+	(select film_id
+	from film_category
+	where category_id in
+		(select category_id
+		from category 
+		where name = 'Family'));
+-- Note to self:  Category and rating pairings do not make sense.
+-- You can have an R rated film that has a "Family" category.
+
+-- 7e. Display the most frequently rented movies in descending order. --
+
+select film.title,rental.inventory_id, count(*) as num_rentals
+from rental
+join inventory on rental.inventory_id = inventory.inventory_id
+join film on film.film_id = inventory.inventory_id
+group by inventory_id
+order by num_rentals desc;
+
+-- 7f. Write a query to display how much business, in dollars, each store brought in. 
+select store.store_id, sum(payment.amount) as Revenue
+from payment
+join staff on payment.staff_id = staff.staff_id
+join store on store.store_id = staff.store_id
+group by store_id;
 
 
-
-/** 7e. Display the most frequently rented movies in descending order. **/
-/** 7f. Write a query to display how much business, in dollars, each store brought in. **/
 /** 7g. Write a query to display for each store its store ID, city, and country. **/
+select store.store_id, city.city, country.country
+from store
+join address on store.address_id = address.address_id
+join city on address.city_id = city.city_id
+join country on city.country_id = country.country_id;
+
 /** 7h. List the top five genres in gross revenue in descending order. 
-(Hint: you may need to use the following tables: category, 
+(Hint: you may need to use the following tables: category,
 film_category, inventory, payment, and rental.)**/
+
+select category.name, sum(payment.amount) as Revenue
+from payment
+join rental on payment.rental_id = rental.rental_id
+join inventory on inventory.inventory_id = rental.inventory_id
+join film_category on film_category.film_id = inventory.film_id
+join category on category.category_id = film_category.category_id
+group by category.name
+Limit 5;
+
+
+
 /**8a. In your new role as an executive, you would like to have an easy way of viewing
  the Top five genres by gross revenue. Use the solution from the problem above to 
  create a view. If you haven't solved 7h, you can substitute another query to create a view.**/
+create view Top_Five_Genres_By_GR
+as 
+select category.name, sum(payment.amount) as Revenue
+from payment
+join rental on payment.rental_id = rental.rental_id
+join inventory on inventory.inventory_id = rental.inventory_id
+join film_category on film_category.film_id = inventory.film_id
+join category on category.category_id = film_category.category_id
+group by category.name
+Limit 5;
+
 /**8b. How would you display the view that you created in 8a?**/
+
+select * from Top_Five_Genres_By_GR;
+
 /**8c. You find that you no longer need the view top_five_genres. Write a query to delete it.**/
-
-
+drop view if exists Top_Five_Genres_By_GR;
 
 
 
