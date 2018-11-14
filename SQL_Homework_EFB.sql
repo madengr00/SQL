@@ -77,11 +77,12 @@ join address on
 address.address_id = staff.address_id;
 
 -- homework 6b Use join to display the total amount rung up by each staff memeber in August 2005
+
 select staff.first_name,
 		staff.last_name,
         sum(payment.amount) as 'Total Payments'
 from staff
-join payment on payment.customer_id = staff.staff_id
+join payment on payment.staff_id = staff.staff_id
 where payment.payment_date between "2005-08-01" and "2005-08-31"
 group by first_name,last_name;
 
